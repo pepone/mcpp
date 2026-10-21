@@ -1538,8 +1538,7 @@ found_name:
     }
 #endif
     if (open_include( filename, (delim == '"'), next)) {
-        /* 'fname' should not be free()ed, it is used as file->         */
-        /*      real_fname and has been registered into fnamelist[]     */
+        free( fname);
         return  TRUE;
     }
 
@@ -1791,7 +1790,7 @@ static int  open_file(
 #if 0   /* This part is only for debugging  */
     chk_dirp( dirp);
 #endif
-    cur_fullname = fullname;
+    cur_fullname = infile->full_fname;
 
     if (! include_opt) {     /* Do not sharp() on -include   */
         src_line = 1;                   /* Working on line 1 now    */
@@ -1803,6 +1802,7 @@ static int  open_file(
         put_depend( fullname);          /* Output dependency line   */
 
 exit_success:
+    free( fullname);
     return  TRUE;
 exit_fail:
     free( fullname);
@@ -1874,8 +1874,9 @@ static const char *     set_fname(
 /*
  * Register the source filename to fnamelist[].
  * Search fnamelist[] for filename or append filename to fnamelist[].
- * Returns the pointer.
- * file->real_fname and file->full_fname points into fnamelist[].
+ * Returns a registry-owned copy with the same spelling, valid until
+ * clear_filelist().  The caller retains ownership of filename.
+ * file->real_fname and file->full_fname point into fnamelist[].
  */
 {
     INC_LIST *  fnamep;
@@ -1896,8 +1897,8 @@ static const char *     set_fname(
     /* Register the filename in fnamelist[] */
     fnamelen = strlen( filename);
     for (fnamep = fnamelist; fnamep < fname_end; fnamep++) {
-        if (fnamep->len == fnamelen && str_case_eq( fnamep->name, filename))
-            return  filename;           /* Already registered       */
+        if (fnamep->len == fnamelen && str_eq( fnamep->name, filename))
+            return  fnamep->name;        /* Already registered       */
     }
     fname_end->name = xmalloc( fnamelen + 1);
     filename = strcpy( fname_end->name, filename);
