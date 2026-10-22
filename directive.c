@@ -286,7 +286,7 @@ ifdo:
         break;
 
     case L_error:
-        cerror( infile->buffer, NULL, 0L, NULL);            /* _E_  */
+        cerror( "%s", infile->buffer, 0L, NULL);            /* _E_  */
         break;
 
     case L_pragma:

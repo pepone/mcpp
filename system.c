@@ -2185,7 +2185,7 @@ void    do_pragma( void)
             }
         } else if (str_eq( identifier, "warning")) {
                                         /* #pragma MCPP warning     */
-            cwarn( infile->buffer, NULL, 0L, NULL);
+            cwarn( "%s", infile->buffer, 0L, NULL);
         } else if (str_eq( identifier, "push_macro")) {
             push_or_pop( PUSH);         /* #pragma MCPP push_macro  */
         } else if (str_eq( identifier, "pop_macro")) {
