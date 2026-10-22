@@ -67,6 +67,10 @@
  *              buffer.
  */
 
+/* configed.H defines _POSIX_C_SOURCE to get PATH_MAX, which on macOS also  */
+/* hides C99 functions such as vsnprintf() unless _C99_SOURCE is defined.   */
+#define _C99_SOURCE     1
+
 #include    "system.H"
 #include    "internal.H"
 
@@ -288,12 +292,27 @@ int    mcpp_lib_fprintf(
         va_start( ap, format);
         if (use_mem_buffers) {
             static char     mem_buffer[ NWORK];
+            va_list     ap_copy;
+            char *      long_buffer;
 
-            rc = vsprintf( mem_buffer, format, ap);
+            va_copy( ap_copy, ap);
+            rc = vsnprintf( mem_buffer, sizeof mem_buffer, format, ap);
 
-            if (rc != 0) {
+            if (rc >= (int) sizeof mem_buffer) {
+                /* Not xmalloc(): its out-of-memory diagnostic is printed   */
+                /* through this function.                                   */
+                long_buffer = malloc( (size_t) rc + 1);
+                if (long_buffer == NULL) {
+                    rc = EOF;
+                } else {
+                    vsnprintf( long_buffer, (size_t) rc + 1, format, ap_copy);
+                    rc = mem_puts( long_buffer, od);
+                    free( long_buffer);
+                }
+            } else if (rc > 0) {
                 rc = mem_puts( mem_buffer, od);
             }
+            va_end( ap_copy);
         } else {
             rc = vfprintf( stream, format, ap);
         }
