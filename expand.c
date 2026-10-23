@@ -1462,6 +1462,13 @@ static char *   substitute(
                 return  NULL;               /* Error                */
             }
         } else {
+            if (out_end <= out) {
+                /* Do not print the partial expansion as the other buffer   */
+                /* overflow diagnostics do: it can be NMACWORK bytes long.  */
+                diag_macro( CERROR, "Buffer overflow expanding macro \"%s\""
+                        , defp->name, 0L, NULL, defp, NULL);    /* _E_  */
+                return  NULL;
+            }
             *out++ = c;                     /* Copy the character   */
         }
     }
