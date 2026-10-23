@@ -1605,6 +1605,9 @@ static int  open_include(
          * Look in local directory of source file.
          * Try to open filename relative to the "source directory".
          */
+        if (strlen( *infile->dirp) + strlen( src_dir) + strlen( filename)
+                >= PATHMAX)
+            cfatal( toolong_fname, src_dir, 0L, filename);  /* _F_  */
         if (open_file( infile->dirp, src_dir, filename, TRUE, FALSE, FALSE))
             return  TRUE;
     }
