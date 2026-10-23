@@ -1313,6 +1313,7 @@ static char *   stringize(
         }
     }
 
+    unget_string( argp, NULL);      /* infile->buffer is the argument   */
     len = strlen( infile->buffer);  /* Sequence ends with RT_END    */
     if (trace_macro) {          /* Remove suffixed argument closing magics  */
         /* There are 0 or more argument closing magic sequences and */
